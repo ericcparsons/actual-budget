@@ -16,6 +16,81 @@ Want to say thanks? Click the ⭐ at the top of the page.
 - Actual [Community Documentation](https://actualbudget.org/docs)
 - [Frequently asked questions](https://actualbudget.org/docs/faq)
 
+## Custom Fork - Deployment Guide
+
+This fork includes custom features. See [EP-CHANGELOG.md](./EP-CHANGELOG.md) for details on changes.
+
+Deployed at: **https://parsons-budget.fly.dev/**
+
+### Prerequisites
+
+- Node.js 22+ with corepack enabled
+- Yarn 4.10.3+
+- Fly.io CLI (`flyctl`)
+- Docker (for Fly.io builds)
+
+### Build Process
+
+1. **Enable corepack and prepare yarn:**
+   ```bash
+   corepack enable
+   corepack prepare yarn@4.10.3 --activate
+   ```
+
+2. **Build the application:**
+   ```bash
+   yarn build:server
+   ```
+
+   This will build all necessary artifacts (~32-33s total):
+   - Translations
+   - Plugin service (~418ms)
+   - Backend/loot-core (~7.5s)
+   - Browser/desktop-client (~24s)
+   - Sync-server
+
+3. **Verify build artifacts exist:**
+   ```bash
+   ls packages/desktop-client/build/  # Should contain index.html, assets, etc.
+   ls packages/sync-server/build/     # Should contain app.js, migrations, etc.
+   ```
+
+### Deploy to Fly.io
+
+1. **Deploy using official Dockerfile:**
+   ```bash
+   flyctl deploy -c fly.toml --now
+   ```
+
+   The deployment uses `packages/sync-server/docker/ubuntu.Dockerfile` which copies pre-built artifacts into an optimized production image (~87 MB).
+
+2. **Monitor deployment:**
+   ```bash
+   flyctl status --app parsons-budget
+   flyctl logs --app parsons-budget
+   ```
+
+3. **View deployment:**
+   - App: https://parsons-budget.fly.dev/
+   - Monitoring: https://fly.io/apps/parsons-budget/monitoring
+
+### Rollback
+
+If deployment fails or has issues:
+```bash
+flyctl releases rollback --app parsons-budget
+```
+
+### Configuration
+
+The `fly.toml` configuration:
+- App name: `parsons-budget`
+- Region: `ord` (Chicago)
+- Memory: 512MB
+- CPU: 1 shared core
+- Auto-scaling: Stops when idle, starts on demand
+- Volume: 1GB persistent storage at `/data`
+
 ## Installation
 
 There are four ways to deploy Actual:
