@@ -307,3 +307,88 @@ async function processTemplate(
     message: `Successfully applied templates to ${templateContexts.length} categories`,
   };
 }
+
+export async function getTotalUnderfunded({
+  month,
+}: {
+  month: string;
+}): Promise<number> {
+  await storeNoteTemplates();
+  const categoryTemplates = await getTemplates();
+  const categories = await getCategories();
+
+  let totalUnderfunded = 0;
+  let debugInfo = [];
+
+  for (const category of categories) {
+    const { id, name } = category;
+    const sheetName = monthUtils.sheetForMonth(month);
+    const templates = categoryTemplates[id];
+
+    if (templates) {
+      try {
+        const budgeted = await getSheetValue(sheetName, `budget-${id}`);
+        const goal = await getSheetValue(sheetName, `goal-${id}`);
+
+        debugInfo.push({
+          name,
+          budgeted,
+          goal,
+          templates: templates.length,
+        });
+
+        // If there's a goal and it's greater than budgeted, add the difference
+        if (goal && goal > budgeted) {
+          totalUnderfunded += goal - budgeted;
+        }
+      } catch (e) {
+        // Silently skip categories with errors
+        continue;
+      }
+    }
+  }
+
+  console.log('[getTotalUnderfunded] Month:', month);
+  console.log('[getTotalUnderfunded] Categories with templates:', debugInfo.length);
+  console.log('[getTotalUnderfunded] Debug info:', JSON.stringify(debugInfo, null, 2));
+  console.log('[getTotalUnderfunded] Total underfunded:', totalUnderfunded);
+
+  return totalUnderfunded;
+}
+
+export async function getTotalTargets({
+  month,
+}: {
+  month: string;
+}): Promise<number> {
+  await storeNoteTemplates();
+  const categoryTemplates = await getTemplates();
+  const categories = await getCategories();
+
+  let totalTargets = 0;
+
+  for (const category of categories) {
+    const { id } = category;
+    const sheetName = monthUtils.sheetForMonth(month);
+    const templates = categoryTemplates[id];
+
+    if (templates) {
+      try {
+        const goal = await getSheetValue(sheetName, `goal-${id}`);
+
+        // Add all goal values regardless of budgeted amount
+        if (goal && goal > 0) {
+          totalTargets += goal;
+        }
+      } catch (e) {
+        // Silently skip categories with errors
+        continue;
+      }
+    }
+  }
+
+  console.log('[getTotalTargets] Month:', month);
+  console.log('[getTotalTargets] Total targets:', totalTargets);
+
+  return totalTargets;
+}

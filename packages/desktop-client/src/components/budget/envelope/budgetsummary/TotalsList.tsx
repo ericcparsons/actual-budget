@@ -1,4 +1,4 @@
-import React, { type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -12,13 +12,18 @@ import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue'
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
+import { useTemplateAmounts } from './UnderfundedAmount';
+
 type TotalsListProps = {
   prevMonthName: string;
+  month: string;
   style?: CSSProperties;
 };
 
-export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+export function TotalsList({ prevMonthName, month, style }: TotalsListProps) {
   const format = useFormat();
+  const { underfunded, totalTargets } = useTemplateAmounts(month);
+
   return (
     <View
       style={{
@@ -117,6 +122,14 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             />
           )}
         </EnvelopeCellValue>
+
+        <Block style={{ fontWeight: 600, color: underfunded > 0 ? '#d33' : undefined }}>
+          {format(underfunded, 'financial')}
+        </Block>
+
+        <Block style={{ fontWeight: 600 }}>
+          {format(totalTargets, 'financial')}
+        </Block>
       </View>
 
       <View>
@@ -135,6 +148,24 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
         <Block>
           <Trans>For next month</Trans>
         </Block>
+
+        <Tooltip
+          content="Total amount needed to reach all goal templates for this month"
+          placement="bottom end"
+        >
+          <Block>
+            <Trans>Underfunded</Trans>
+          </Block>
+        </Tooltip>
+
+        <Tooltip
+          content="Total amount of all goal templates for this month"
+          placement="bottom end"
+        >
+          <Block>
+            <Trans>Total Targets</Trans>
+          </Block>
+        </Tooltip>
       </View>
     </View>
   );
