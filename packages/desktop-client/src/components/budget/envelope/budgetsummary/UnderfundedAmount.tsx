@@ -14,9 +14,9 @@ export function useTemplateAmounts(month: string): TemplateAmounts {
   const [underfundedAmount, setUnderfundedAmount] = useState<number>(0);
   const [totalTargets, setTotalTargets] = useState<number>(0);
 
-  // Watch for changes to the budget - when budgets change, this will trigger a re-fetch
-  const toBudgetValue = useEnvelopeSheetValue({
-    name: envelopeBudget.toBudget,
+  // Watch total budgeted amount - changes when templates are applied or cleared
+  const totalBudgeted = useEnvelopeSheetValue({
+    name: envelopeBudget.totalBudgeted,
     value: 0,
   });
 
@@ -37,7 +37,7 @@ export function useTemplateAmounts(month: string): TemplateAmounts {
     }
 
     loadAmounts();
-  }, [month, toBudgetValue]);
+  }, [month, totalBudgeted]);
 
   return {
     underfunded: underfundedAmount,
