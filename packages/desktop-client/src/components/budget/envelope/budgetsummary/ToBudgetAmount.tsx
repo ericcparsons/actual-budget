@@ -19,6 +19,7 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type ToBudgetAmountProps = {
+  month: string;
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
@@ -28,6 +29,7 @@ type ToBudgetAmountProps = {
 };
 
 export function ToBudgetAmount({
+  month,
   prevMonthName,
   style,
   amountStyle,
@@ -59,6 +61,7 @@ export function ToBudgetAmount({
           content={
             <TotalsList
               prevMonthName={prevMonthName}
+              month={month}
               style={{
                 padding: 7,
               }}

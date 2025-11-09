@@ -160,12 +160,14 @@ export function EnvelopeBudgetSummaryModal({
           <SheetNameProvider name={sheetForMonth(month)}>
             <TotalsList
               prevMonthName={prevMonthName}
+              month={month}
               style={{
                 ...styles.mediumText,
               }}
             />
             <ToBudgetAmount
               prevMonthName={prevMonthName}
+              month={month}
               style={{
                 ...styles.mediumText,
                 marginTop: 15,

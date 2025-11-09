@@ -72,6 +72,7 @@ export function ToBudget({
             resetPosition();
             setMenuOpen(true);
           }}
+          month={month}
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
